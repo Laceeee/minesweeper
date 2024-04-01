@@ -129,22 +129,29 @@ function newGame(isPressed) {
 }
 
 function revealTile(xCord, yCord) {
-    if (revealedCoordinates.has(`${xCord}-${yCord}`) || flaggedCoordinates.has(`${xCord}-${yCord}`)) {
-        return;
-    }
-    let coordinates = getCoordinatesToReveal(xCord, yCord);
-
-    for (let i = 0; i < coordinates.length; i++) {
-        let imgSource;
-        let coordinate = coordinates[i];
-        let tile = map[coordinate[1]][coordinate[0]]
-
-        if (tile >= 0 && tile < 9) {
-            imgSource = `assets/${tile}.png`;
+    let tile = map[yCord][xCord];
+    if (!revealedCoordinates.has(`${xCord}-${yCord}`) || !flaggedCoordinates.has(`${xCord}-${yCord}`)) {
+        if (tile === 9) {
+            let mineCoordinates = new Set();
+            mineCoordinates.add(`${xCord}-${yCord}`);
+            revealMine(mineCoordinates);
         }
-        revealedCoordinates.add(`${coordinate[0]}-${coordinate[1]}`);
-        remainingCoordinates.delete(`${coordinate[0]}-${coordinate[1]}`);
-        drawTileWithImgLoading(coordinate[0], coordinate[1], imgSource);
+        else {
+            let coordinates = getCoordinatesToReveal(xCord, yCord);
+
+            for (let i = 0; i < coordinates.length; i++) {
+                let imgSource;
+                let coordinate = coordinates[i];
+                let tile = map[coordinate[1]][coordinate[0]]
+
+                if (tile >= 0 && tile < 9) {
+                    imgSource = `assets/${tile}.png`;
+                }
+                revealedCoordinates.add(`${coordinate[0]}-${coordinate[1]}`);
+                remainingCoordinates.delete(`${coordinate[0]}-${coordinate[1]}`);
+                drawTileWithImgLoading(coordinate[0], coordinate[1], imgSource);
+            }
+        }
     }
 }
 
@@ -434,15 +441,7 @@ canvas.addEventListener("mouseup", function (event) {
         if (map === undefined) {
             map = generateMap(coordinates);
         }
-        let tile = map[coordinates[1]][coordinates[0]];
-        if (tile >= 0 && tile < 9) {
-            revealTile(coordinates[0], coordinates[1]);
-        }
-        else {
-            let mineCoordinates = new Set();
-            mineCoordinates.add(`${coordinates[0]}-${coordinates[1]}`);
-            revealMine(mineCoordinates);
-        }
+        revealTile(coordinates[0], coordinates[1]);
     }
     if (event.button === 1) {
         let imgSource = `assets/hidden.png`;
